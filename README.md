@@ -52,3 +52,26 @@ During to privacy concern, currently the reference of Accugenomics Spike-in Cont
 ## Example 
  
 `perl SIST3.pl -f1=data/test_1.fastq.gz -f2=data/test_2.fastq.gz -O=output/test`
+
+
+## Key algorithms
+We used FLAGs to determine whether a read is IS or NT reas based on following criteria:  
+
+(1) $muts_included: IS position (dinucleotides) in the test reads.  
+(2) $count_ref:  How many REF (NT) occurred in these positions.  
+(3) $remain_spikein: How many ALT (IS) occurred in these positions.
+(4) $mismatch: customized threshold of option -m;
+
+$IS_flag = 1 if ($remain_spikein >= $muts_included-$mismatch && $muts_included > 2+$mismatch);  
+$IS_flag = 1 if ($remain_spikein == $muts_included && $muts_included >=2 && $muts_included <= 2+$mismatch);  
+
+$NT_flag = 1 if ($count_ref >= $muts_included-$mismatch  && $muts_included > 2+$mismatch );  
+$NT_flag = 1 if ($count_ref == $muts_included  && $muts_included >=2 && $muts_included <= 2+$mismatch);  
+
+if the read had both IS_flag and NT_flag ==0, it will go to the Native reads. Or, if the read had $muts_included==0 or didn't mapped to the IS sequence, it will also be considered as Native reads.  
+
+Then, we used the NT reference for further fine-tuning. as if the suspected reads mapped much better to NT reference than IS reference and didn't have any dinucleotides, it will also be considered as NT reads.
+  
+
+				
+
